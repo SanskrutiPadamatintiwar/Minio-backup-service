@@ -1,4 +1,3 @@
-
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from datetime import datetime
 from services.dbconnection import Base
@@ -13,3 +12,5 @@ class FileUpload(Base):
     file_path = Column(String(500), nullable=False)
     is_synced = Column(Boolean, default=False)
     last_synced = Column(DateTime, nullable=True)
+    file_url = Column(String(500), nullable=True)
+    
