@@ -2,27 +2,28 @@
 
 A full-stack application for internal file uploads and backups, designed for organizations that need controlled, on-device file storage with scheduled backups to object storage.
 
-The system provides a simple UI for users to upload and view files, while backend cron jobs handle reliable backups to an object store.
+The system provides a web-based UI for users to upload and view files, while backend background jobs reliably back up files to an object store.
 
 ---
 
 ## Overview
 
-This project focuses on building an internal backup and file-sharing system suitable for LAN-based environments.  
-Uploaded files are temporarily stored on the server and later backed up to object storage using scheduled background jobs.
+This project implements an internal backup and file-sharing system suitable for LAN-based or private network environments.
 
-The design supports controlled internal access while maintaining separation between user uploads and long-term storage.
+Uploaded files are first stored temporarily on the application server. Scheduled background jobs then move pending files to long-term object storage, ensuring separation between user-facing uploads and persistent backups.
+
+MinIO is used as a self-hosted, S3-compatible object storage solution and is deployed via Docker to closely mirror real-world infrastructure setups.
 
 ---
 
 ## Key Features
 
 - Web-based UI for file upload and file listing  
-- Temporary server-side storage for uploaded files  
+- Temporary server-side storage for incoming files  
 - Scheduled background jobs for reliable backups  
-- Integration with MinIO object storage  
+- Dockerized MinIO object storage integration  
 - Designed for internal / LAN-based usage  
-- Extensible storage layer for future cloud providers  
+- Extensible storage layer for additional cloud providers  
 
 ---
 
@@ -36,31 +37,53 @@ The design supports controlled internal access while maintaining separation betw
 
 ### Storage
 - MinIO (S3-compatible object storage)
+- MinIO deployed using Docker containers
 
 ### Scheduling
-- APScheduler (cron-based background jobs)
+- APScheduler (cron-style background jobs)
 
 ---
 
-## How It Works
+## System Flow
 
 1. Users upload files through the web UI  
-2. Files are temporarily stored on the application server  
-3. A scheduled cron job scans for pending files  
-4. Pending files are pushed to MinIO object storage  
+2. Files are stored temporarily on the application server  
+3. A scheduled background job scans for pending files  
+4. Pending files are uploaded to MinIO object storage  
 5. Files become available for internal access and sharing  
+
+---
+
+## Object Storage Setup (MinIO via Docker)
+
+MinIO is run as a Docker container to provide a self-hosted object storage layer.
+
+This approach allows the system to:
+- Remain fully local and network-controlled  
+- Use S3-compatible APIs  
+- Stay easily extensible to cloud storage providers  
+
+Example MinIO container setup:
+
+```bash
+docker run -p 9000:9000 -p 9001:9001 \
+  -e MINIO_ROOT_USER=minioadmin \
+  -e MINIO_ROOT_PASSWORD=minioadmin \
+  minio/minio server /data --console-address ":9001"
+````
+
+The backend communicates with MinIO using S3-compatible APIs for object uploads and retrieval.
 
 ---
 
 ## Project Structure
 
 ```
-
-/client          # React frontend
-/server          # FastAPI backend
-/cron            # Cron jobs using APScheduler
-
-````
+/client        # React frontend
+/server        # FastAPI backend
+/cron          # APScheduler-based background jobs
+/uploads       # MinIO integration and storage utilities
+```
 
 ---
 
@@ -69,12 +92,12 @@ The design supports controlled internal access while maintaining separation betw
 ```bash
 git clone https://github.com/SanskrutiPadamatintiwar/internal-file-backup-system.git
 cd internal-file-backup-system
-````
+```
 
 ### Backend
 
 ```bash
-cd backend
+cd server
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
@@ -82,10 +105,12 @@ uvicorn main:app --reload
 ### Frontend
 
 ```bash
-cd frontend
+cd client
 npm install
 npm start
 ```
+
+> Note: MinIO must be running via Docker before starting the backend.
 
 ---
 
@@ -105,22 +130,23 @@ npm start
 * File versioning
 * Role-based access control
 * Backup status monitoring
+* Docker Compose setup for full-stack deployment
 
 ---
 
 ## Why This Project
 
-This project was built to understand:
+This project was built to explore practical backend and infrastructure concepts, including:
 
-* object storage integration in real systems
-* background job scheduling in backend services
+* object storage integration
+* background job scheduling
+* containerized infrastructure
 * separation of temporary and persistent storage
-* building internal tools with practical constraints
+* building internal tools with real operational constraints
 
 ---
 
 ## Author
 
 Sanskruti Padamatintiwar
-
 
