@@ -56,14 +56,11 @@ The design supports controlled internal access while maintaining separation betw
 
 ```
 
-/frontend        # React frontend
-/backend         # FastAPI backend
-/scheduler       # Cron jobs using APScheduler
-/storage         # Object storage integration (MinIO)
+/client          # React frontend
+/server          # FastAPI backend
+/cron            # Cron jobs using APScheduler
 
 ````
-
-*(Structure may vary slightly based on implementation.)*
 
 ---
 
